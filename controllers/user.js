@@ -21,16 +21,25 @@ exports.getUser = async (req, res) => {
     try {
         const id = req.params.id;
 
-        User.findByPk(id)
-            .then(data => {
-                if (data) {
-                    return res.status(200)
-                        .json({success: true, data})
-                } else {
-                    return res.status(400)
-                        .json({success: false, message: `Cannot find User with id=${id}.`})
-                }
-            })
+        // User.findByPk(id)
+        //     .then(data => {
+        //         if (data) {
+        //             return res.status(200)
+        //                 .json({success: true, data})
+        //         } else {
+        //             return res.status(400)
+        //                 .json({success: false, message: `Cannot find User with id=${id}.`})
+        //         }
+        //     })
+
+        const user = await User.findByPk(id)
+        if(!user) {
+            return res.status(400)
+                .json({success: false, message: `Cannot find User with id=${id}.`})
+        } else {
+            return res.status(200)
+                .json({success: true, user})
+        }
 
     } catch (err) {
         return res.status(400).json({
