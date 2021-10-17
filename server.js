@@ -10,7 +10,7 @@ const app = express();
 
 app.use(express.json());
 
-sequelize.sync().then( (result) => {
+sequelize.sync({ alter: true }).then( (result) => {
     // console.log(result)
 }).catch((error) => {
     console.log(error)
