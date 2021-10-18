@@ -4,6 +4,8 @@ exports.getUser = async (req, res, next) => {
     try {
         const id = req.params.id;
 
+
+
         const user = await CreateUser.findByPk(id)
 
         if(!user) {

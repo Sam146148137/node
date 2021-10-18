@@ -3,7 +3,7 @@ const router = express.Router();
 
 const createUserController = require('../controllers/createUser');
 const getAllUsersController = require('../controllers/getAllUsers');
-const getUserController = require('../controllers/getUser');
+const getUserController = require('../controllers/getOneUser');
 const updateUserController = require('../controllers/updateUser');
 const deleteUserController = require('../controllers/deleteUser');
 
