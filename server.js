@@ -4,7 +4,8 @@ const dotenv = require('dotenv');
 dotenv.config({path: './.env'});
 
 const sequelize = require('./util/db');
-const userRouter = require('./routes/user');
+const userRouter = require('./user/endpoints');
+const errorHandler = require('./middleware/error');
 
 const app = express();
 
@@ -14,9 +15,11 @@ sequelize.sync({ alter: true }).then( (result) => {
     // console.log(result)
 }).catch((error) => {
     console.log(error)
-})
+});
 
 app.use('/user', userRouter);
+
+app.use(errorHandler);
 
 const port = process.env.PORT;
 
