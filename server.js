@@ -5,6 +5,7 @@ dotenv.config({path: './.env'});
 
 const sequelize = require('./util/db');
 const userRouter = require('./user/endpoints');
+const authRouter = require('./auth/endpoints');
 const errorHandler = require('./middleware/error');
 
 const app = express();
@@ -17,7 +18,7 @@ sequelize.sync({ alter: true }).then( (result) => {
     console.log(error)
 });
 
-app.use('/user', userRouter);
+app.use('/', authRouter, userRouter);
 
 app.use(errorHandler);
 
