@@ -1,6 +1,7 @@
 const User = require('../models/user');
 const { validationResult } = require('express-validator');
 const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 
 exports.signUp = async (req, res, next) => {
     try {
@@ -40,7 +41,7 @@ exports.signUp = async (req, res, next) => {
         if (user) {
             return res.status(201).json({
                 data: user,
-                msg: 'User is created'
+                message: 'User is created'
             })
         }
     } catch (err) {
@@ -67,12 +68,8 @@ exports.login = async (req, res, next) => {
             return res.status(400).json('Email doesn\'t exist');
         }
 
-
-
-        console.log(77777777777777, user)
-
-
-
+        // checking user's visual for developer
+        console.log(77777777777777, user, 77777777777777)
 
         // Checking if password is correct
         const validPassword = await bcrypt.compare(req.body.password, user.password)
@@ -80,7 +77,10 @@ exports.login = async (req, res, next) => {
             return res.status(400).send('Invalid Password');
         }
 
-        return res.status(200).send('Logged In')
+        // creating and assigning a token
+        const token = jwt.sign({ id: user.id }, process.env.SECRET_TOKEN)
+        res.header('auth-token', token).send(token)
+
     } catch (e) {
         next(e);
     }

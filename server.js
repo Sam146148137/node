@@ -8,6 +8,7 @@ const userRouter = require('./user/endpoints');
 const authRouter = require('./auth/endpoints');
 const errorHandler = require('./middleware/error');
 
+
 const app = express();
 
 app.use(express.json());
