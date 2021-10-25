@@ -1,5 +1,6 @@
 const User = require('../models/user');
 const { validationResult } = require('express-validator');
+const { BAD_REQUEST_CODE, CREATED_CODE } = require('../util/status-codes');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
@@ -8,14 +9,14 @@ exports.signUp = async (req, res, next) => {
 
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
-            return res.status(400).json({ errors: errors.array().filter((message) => {
+            return res.status(BAD_REQUEST_CODE).json({ errors: errors.array().filter((message) => {
                 res.json(message.msg.message)
                 }) });
            // return next(new ErrorResponse("The name must be 3+ characters", 400));
         }
 
         if (!req.body.first_name || !req.body.last_name || !req.body.email || !req.body.password || !req.body.phone) {
-            return res.status(400).json('400 Bad Request')
+            return res.status(BAD_REQUEST_CODE).json('400 Bad Request')
         }
 
         //check if the user is already in the database
@@ -23,7 +24,7 @@ exports.signUp = async (req, res, next) => {
                 email: req.body.email
             }});
         if(emailExist) {
-            return res.status(400).json('Email already exist');
+            return res.status(BAD_REQUEST_CODE).json('Email already exist');
         }
 
         //hashing password
@@ -39,7 +40,7 @@ exports.signUp = async (req, res, next) => {
        })
 
         if (user) {
-            return res.status(201).json({
+            return res.status(CREATED_CODE).json({
                 data: user,
                 message: 'User is created'
             })
@@ -54,7 +55,7 @@ exports.login = async (req, res, next) => {
         //express validation
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
-            return res.status(400).json({ errors: errors.array().filter((message) => {
+            return res.status(BAD_REQUEST_CODE).json({ errors: errors.array().filter((message) => {
                     res.json(message.msg.message)
                 }) });
             // return next(new ErrorResponse("The name must be 3+ characters", 400));
@@ -65,7 +66,7 @@ exports.login = async (req, res, next) => {
                 email: req.body.email
             }});
         if(!user) {
-            return res.status(400).json('Email doesn\'t exist');
+            return res.status(BAD_REQUEST_CODE).json('Email doesn\'t exist');
         }
 
         // checking user's visual for developer
@@ -74,7 +75,7 @@ exports.login = async (req, res, next) => {
         // Checking if password is correct
         const validPassword = await bcrypt.compare(req.body.password, user.password)
         if(!validPassword) {
-            return res.status(400).send('Invalid Password');
+            return res.status(BAD_REQUEST_CODE).send('Invalid Password');
         }
 
         // creating and assigning a token
