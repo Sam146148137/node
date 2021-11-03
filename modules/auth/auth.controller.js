@@ -1,24 +1,10 @@
-const User = require('../models/user');
-const { validationResult } = require('express-validator');
-const { BAD_REQUEST_CODE, CREATED_CODE } = require('../util/status-codes');
+const User = require('../../models/user');
+const { BAD_REQUEST_CODE, CREATED_CODE } = require('../../util/status-codes');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
 exports.signUp = async (req, res, next) => {
     try {
-
-        const errors = validationResult(req);
-        if (!errors.isEmpty()) {
-            return res.status(BAD_REQUEST_CODE).json({ errors: errors.array().filter((message) => {
-                res.json(message.msg.message)
-                }) });
-           // return next(new ErrorResponse("The name must be 3+ characters", 400));
-        }
-
-        if (!req.body.first_name || !req.body.last_name || !req.body.email || !req.body.password || !req.body.phone) {
-            return res.status(BAD_REQUEST_CODE).json('400 Bad Request')
-        }
-
         //check if the user is already in the database
         const emailExist = await User.findOne({where: {
                 email: req.body.email
@@ -35,8 +21,8 @@ exports.signUp = async (req, res, next) => {
            first_name: req.body.first_name,
            last_name: req.body.last_name,
            email: req.body.email,
-           password: hashedPassword,
            phone: req.body.phone,
+           password: hashedPassword,
        })
 
         if (user) {
@@ -52,34 +38,25 @@ exports.signUp = async (req, res, next) => {
 
 exports.login = async (req, res, next) => {
     try {
-        //express validation
-        const errors = validationResult(req);
-        if (!errors.isEmpty()) {
-            return res.status(BAD_REQUEST_CODE).json({ errors: errors.array().filter((message) => {
-                    res.json(message.msg.message)
-                }) });
-            // return next(new ErrorResponse("The name must be 3+ characters", 400));
-        }
-
         //check if the email exist
-        const user = await User.findOne({where: {
+        const emailExist = await User.findOne({where: {
                 email: req.body.email
             }});
-        if(!user) {
+        if(!emailExist) {
             return res.status(BAD_REQUEST_CODE).json('Email doesn\'t exist');
         }
 
-        // checking user's visual for developer
-        console.log(77777777777777, user, 77777777777777)
-
         // Checking if password is correct
-        const validPassword = await bcrypt.compare(req.body.password, user.password)
+        const validPassword = await bcrypt.compare(req.body.password, emailExist.password)
         if(!validPassword) {
             return res.status(BAD_REQUEST_CODE).send('Invalid Password');
         }
 
         // creating and assigning a token
-        const token = jwt.sign({ id: user.id }, process.env.SECRET_TOKEN)
+        const token = jwt.sign({ id: emailExist.id }, process.env.SECRET_TOKEN,
+            {
+            expiresIn: "5m"
+        })
         res.header('auth-token', token).send(token)
 
     } catch (e) {

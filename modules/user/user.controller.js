@@ -1,7 +1,7 @@
-const { validationResult } = require('express-validator');
-const { SUCCESS_CODE, NOT_FOUND_CODE, BAD_REQUEST_CODE } = require('../util/status-codes');
-const CreateUser = require("../models/user");
-const User = require("../models/user");
+const { SUCCESS_CODE, NOT_FOUND_CODE, BAD_REQUEST_CODE } = require('../../util/status-codes');
+const CreateUser = require("../../models/user");
+const User = require("../../models/user");
+const bcrypt = require("bcryptjs");
 
 
 exports.getUser = async (req, res, next) => {
@@ -44,17 +44,6 @@ exports.updateUser = async (req, res, next) => {
     try {
         const id = req.params.id;
 
-        if (!req.body.first_name || !req.body.last_name || !req.body.email || !req.body.password || !req.body.phone) {
-            return res.status(BAD_REQUEST_CODE).json('400 Bad Request')
-        }
-
-        const errors = validationResult(req);
-        if (!errors.isEmpty()) {
-            return res.status(BAD_REQUEST_CODE).json({ errors: errors.array().filter((message) => {
-                    res.json(message.msg.message)
-                }) });
-        }
-
         //check if the user is already in the database
         const emailExist = await User.findOne({where: {
                 email: req.body.email
@@ -63,8 +52,18 @@ exports.updateUser = async (req, res, next) => {
             return res.status(BAD_REQUEST_CODE).json('Email already exist');
         }
 
+        //hashing password
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(req.body.password, salt);
 
-        const user = await CreateUser.update(req.body, {
+        const user = await CreateUser.update(
+            {
+                first_name: req.body.first_name,
+                last_name: req.body.last_name,
+                email: req.body.email,
+                phone: req.body.phone,
+                password: hashedPassword
+            }, {
             where: { id: id }
         })
 
@@ -95,10 +94,9 @@ exports.deleteUser = async (req, res, next) => {
             )
         }
 
-        if (user == 1) {
+        if (user === 1) {
             return res.status(SUCCESS_CODE).json(`User with id ${id} was deleted successfully`)
         }
-
 
     } catch (e) {
         next(e)
