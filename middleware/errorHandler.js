@@ -1,12 +1,17 @@
 const { validationResult } = require("express-validator");
+
 const { BAD_REQUEST_CODE } = require("../util/status-codes");
+const sequelize = require('../util/db');
 
 async function errorHandler (req,res, next) {
     const errors = validationResult(req);
 
-    console.log(errors);
+    const transaction = await sequelize.transaction()
 
+    console.log(errors);
+    transaction.rollback();
     if (!errors.isEmpty()) {
+        await transaction.rollback()
         return res.status(BAD_REQUEST_CODE).json({ errors: errors.array().filter((message) => {
                 res.json(message.msg.message)
             }) });

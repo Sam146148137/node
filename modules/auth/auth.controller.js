@@ -23,6 +23,7 @@ exports.signUp = async (req, res, next) => {
            email: req.body.email,
            phone: req.body.phone,
            password: hashedPassword,
+           money: req.body.money,
        })
 
         if (user) {

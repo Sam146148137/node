@@ -28,6 +28,11 @@ const User = sequelize.define('users', {
         type: Sequelize.BIGINT,
         allowNull: false
     },
+
+    money: {
+        type: Sequelize.BIGINT,
+        allowNull: false
+    },
 });
 
 module.exports = User;

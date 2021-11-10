@@ -6,8 +6,6 @@ dotenv.config({path: './.env'});
 const sequelize = require('./util/db');
 const userRouter = require('./modules/user/endpoints');
 const authRouter = require('./modules/auth/endpoints');
-const errorHandler = require('./middleware/error');
-
 
 const app = express();
 
@@ -20,8 +18,6 @@ sequelize.sync({ force: true }).then( (result) => {
 });
 
 app.use('/', authRouter, userRouter);
-
-app.use(errorHandler);
 
 const port = process.env.PORT;
 
